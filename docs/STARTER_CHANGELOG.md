@@ -26,3 +26,5 @@ how each was fixed. (This file is removed from projects created with create-proj
 | Repo not formatted: `format:check` would fail the first CI run                              | Formatted; Prettier config committed                                                    |
 | Auth was a stub                                                                             | Register/login/refresh/logout/me with rotation + reuse detection, guards, roles, tests  |
 | No env validation, logging policy, health checks, error format, shutdown                    | Zod env, pino + redaction, request IDs, live/ready probes, error filter, shutdown hooks |
+| Dependabot bumped single `@nestjs/*` packages to a new major → CI failed (mixed Nest 11/12) | Group `@nestjs/*`, Prisma, Vitest, ESLint updates in `dependabot.yml`                   |
+| Dependabot TypeScript 6 PR failed (tsup `baseUrl`, API `Node10` resolution)                 | TS majors ignored until a planned migration; steps in `TROUBLESHOOTING.md`              |

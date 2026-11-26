@@ -4,9 +4,25 @@ updates:
     directory: /
     schedule: { interval: weekly }
     open-pull-requests-limit: 10
+    # A dependency goes into the first group that matches it.
+    # Packages that must stay on the same major version are grouped for ALL update types,
+    # otherwise Dependabot bumps one of them alone and the build breaks
+    # (e.g. @nestjs/platform-fastify 12 with @nestjs/common 11).
     groups:
+      nestjs:
+        patterns: ['@nestjs/*']
+      prisma:
+        patterns: ['prisma', '@prisma/*']
+      vitest:
+        patterns: ['vitest', '@vitest/*']
+      eslint:
+        patterns: ['eslint', '@eslint/*', 'typescript-eslint', 'eslint-*', 'vue-eslint-parser']
       minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      # TypeScript majors need a planned migration (see docs/TROUBLESHOOTING.md, "TypeScript 6").
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: weekly }

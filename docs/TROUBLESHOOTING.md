@@ -63,3 +63,22 @@ package has a `"files"` field. Keep `"files": ["dist", ...]` in `apps/api` and `
 **Refresh does not work in production.** The refresh cookie is `Secure` when
 `COOKIE_SECURE=true`, so the site must be served over HTTPS. The SPA and API must be on the same
 site (nginx proxies `/api`), because the cookie is `SameSite=Strict`.
+
+## Dependency updates
+
+**A Dependabot PR for one `@nestjs/*` package fails with `Cannot find module '@nestjs/common/internal'`.**
+NestJS packages must share the same major version. `.github/dependabot.yml` groups `@nestjs/*`
+(and Prisma, Vitest, ESLint) so they are bumped together in one PR. If an old single-package PR is
+still open, close it and wait for the grouped one.
+
+**TypeScript 6.** Major TypeScript updates are ignored by Dependabot until migrated on purpose.
+Known blockers found when testing TypeScript 6.0:
+
+- tsup 8.5 always passes `baseUrl` to the DTS build → `TS5101`. Fix: in `packages/*/tsup.config.ts`
+  set `dts: { compilerOptions: { ignoreDeprecations: '6.0' } }` (invalid on TypeScript 5, so change
+  it together with the upgrade).
+- `apps/api` uses `moduleResolution: Node10` → `TS5107`. Fix: move to `module`/`moduleResolution`
+  `Node16`, add `.js` extensions to relative imports, and keep `vitest.config.ts` out of the
+  CommonJS type check (it imports ESM-only packages).
+
+Run `pnpm verify` and the e2e tests after the migration.
