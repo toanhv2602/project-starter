@@ -29,7 +29,15 @@ const SKIP_DIRS = new Set([
   'blob-report',
   '.turbo',
 ])
-const SKIP_FILES = new Set(['.env', '.env.local', '.env.production', 'tsconfig.tsbuildinfo'])
+// Never copy secrets or personal settings into a new project.
+const SKIP_FILES = new Set([
+  '.env',
+  '.env.local',
+  '.env.production',
+  '.env.staging',
+  'settings.local.json',
+  'tsconfig.tsbuildinfo',
+])
 // Files only useful inside the starter itself.
 const STARTER_ONLY = ['scripts/create-project.mjs', 'docs/STARTER_CHANGELOG.md']
 

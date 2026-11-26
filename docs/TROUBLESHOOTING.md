@@ -52,6 +52,11 @@ Fix the reported problem; do not bypass the hook with `--no-verify`.
 
 ## Docker
 
+**`docker build` is extremely slow from WSL on a `/mnt/c/...` repo.** Docker scans the build
+context over the Windows file share (including every `node_modules` symlink, even though they are
+ignored). Clone the repo inside the WSL filesystem (`~/code/...`) for Docker work, or build from
+a clean export: `git archive HEAD | tar -x -C /tmp/build && docker build /tmp/build`.
+
 **`pnpm deploy` output is missing `dist/`.** `pnpm deploy` follows `.gitignore` unless the
 package has a `"files"` field. Keep `"files": ["dist", ...]` in `apps/api` and `apps/worker`.
 
