@@ -1,27 +1,53 @@
 {
   "name": "full-node-starter",
   "private": true,
-  "packageManager": "pnpm@10.0.0",
+  "packageManager": "pnpm@10.7.1",
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=22.12.0"
   },
   "scripts": {
-    "dev": "pnpm --parallel --filter @app/web --filter @app/api --filter @app/worker dev",
+    "prepare": "simple-git-hooks || true",
+    "dev": "pnpm build:packages && pnpm --parallel --filter @app/web --filter @app/api --filter @app/worker --filter @app/contracts dev",
     "build": "pnpm -r build",
-    "lint": "pnpm -r lint",
-    "typecheck": "pnpm -r typecheck",
-    "test": "pnpm -r test",
+    "build:packages": "pnpm --filter \"./packages/**\" build",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "pnpm build:packages && pnpm -r typecheck",
+    "test": "pnpm build:packages && pnpm -r test",
+    "test:e2e": "pnpm --filter @app/e2e test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "infra:up": "docker compose up -d --wait postgres redis",
+    "infra:down": "docker compose down",
     "db:generate": "pnpm --filter @app/api prisma:generate",
     "db:migrate:dev": "pnpm --filter @app/api prisma:migrate:dev",
-    "db:migrate:deploy": "pnpm --filter @app/api prisma:migrate:deploy"
+    "db:migrate:deploy": "pnpm --filter @app/api prisma:migrate:deploy",
+    "db:seed": "pnpm --filter @app/api prisma:seed",
+    "api:generate": "pnpm --filter @app/api openapi:export && pnpm --filter @app/api-client generate",
+    "setup": "node scripts/setup.mjs",
+    "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   },
   "devDependencies": {
-    "prettier": "^3.4.2",
-    "typescript": "^5.7.2",
+    "@eslint/js": "^9.17.0",
     "eslint": "^9.17.0",
+    "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-vue": "^9.32.0",
-    "typescript-eslint": "^8.19.0"
+    "globals": "^15.14.0",
+    "lint-staged": "^15.2.11",
+    "prettier": "^3.4.2",
+    "simple-git-hooks": "^2.11.1",
+    "typescript": "~5.7.2",
+    "typescript-eslint": "^8.19.0",
+    "vue-eslint-parser": "^9.4.3"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm exec lint-staged"
+  },
+  "lint-staged": {
+    "*.{ts,mts,cts,vue,js,mjs,cjs}": [
+      "prettier --write",
+      "eslint --fix --max-warnings 0 --no-warn-ignored"
+    ],
+    "*.{json,md,yml,yaml,css,html}": "prettier --write"
   }
 }

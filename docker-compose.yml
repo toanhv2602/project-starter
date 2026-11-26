@@ -1,32 +1,44 @@
+# Local development infrastructure only. Production: docker-compose.prod.yml
+# Ports are bound to 127.0.0.1 so the dev database is not exposed to your network.
+name: full-node-starter
+
 services:
   postgres:
-    image: postgres:16
+    image: postgres:16-alpine
     environment:
       POSTGRES_USER: app
       POSTGRES_PASSWORD: app_dev_password
       POSTGRES_DB: app_db
     ports:
-      - "5432:5432"
+      - '127.0.0.1:5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U app -d app_db"]
+      test: ['CMD-SHELL', 'pg_isready -U app -d app_db']
       interval: 5s
       timeout: 5s
       retries: 10
 
   redis:
-    image: redis:7
-    command: ["redis-server", "--appendonly", "yes"]
+    image: redis:7-alpine
+    command: ['redis-server', '--appendonly', 'yes']
     ports:
-      - "6379:6379"
+      - '127.0.0.1:6379:6379'
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
       timeout: 3s
       retries: 10
+
+  # Catches outgoing email in development. UI: http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:latest
+    profiles: ['mail']
+    ports:
+      - '127.0.0.1:1025:1025'
+      - '127.0.0.1:8025:8025'
 
 volumes:
   postgres_data:

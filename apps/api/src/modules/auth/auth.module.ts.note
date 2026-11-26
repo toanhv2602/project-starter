@@ -1,3 +1,0 @@
-Auth module is intentionally a foundation. Add login/refresh/logout use cases,
-guards, password verification, refresh-token family rotation and integration tests
-before enabling public authentication routes.

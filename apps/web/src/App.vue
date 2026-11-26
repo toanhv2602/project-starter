@@ -1,28 +1,28 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { useQueryClient } from '@tanstack/vue-query'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
-const apiStatus = ref('Not checked')
+const auth = useAuthStore()
+const router = useRouter()
+const queryClient = useQueryClient()
 
-async function checkApi() {
-  apiStatus.value = 'Checking...'
-  try {
-    const response = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000'}/api/v1/health`,
-    )
-    if (!response.ok) throw new Error(`HTTP ${response.status}`)
-    apiStatus.value = 'API is healthy'
-  } catch {
-    apiStatus.value = 'API unavailable'
-  }
+async function signOut(): Promise<void> {
+  await auth.logout()
+  queryClient.clear()
+  await router.push({ name: 'login' })
 }
 </script>
 
 <template>
-  <main class="container">
-    <p class="eyebrow">FULL NODE STARTER</p>
-    <h1>Vue 3 + NestJS</h1>
-    <p class="muted">Your Modular Monolith workspace is ready to extend.</p>
-    <button type="button" @click="checkApi">Check API health</button>
-    <p class="status" role="status">{{ apiStatus }}</p>
+  <header class="topbar">
+    <RouterLink to="/" class="brand">Full Node Starter</RouterLink>
+    <nav v-if="auth.isAuthenticated" class="nav">
+      <span class="muted">{{ auth.user?.displayName }}</span>
+      <button type="button" class="link" @click="signOut">Sign out</button>
+    </nav>
+  </header>
+  <main class="page">
+    <RouterView />
   </main>
 </template>

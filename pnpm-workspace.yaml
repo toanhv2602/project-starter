@@ -1,3 +1,24 @@
 packages:
-  - "apps/*"
-  - "packages/*"
+  - 'apps/*'
+  - 'packages/*'
+  - 'e2e'
+
+# pnpm 10 blocks dependency install scripts by default.
+# These packages need their postinstall step (native binaries / engines).
+onlyBuiltDependencies:
+  - '@prisma/client'
+  - '@prisma/engines'
+  - '@swc/core'
+  - argon2
+  - esbuild
+  - prisma
+  - simple-git-hooks
+  - vue-demi
+
+# Required by `pnpm deploy` (used in Dockerfiles) for workspace dependencies.
+injectWorkspacePackages: true
+
+# Build scripts we deliberately skip (telemetry / optional native speed-ups).
+ignoredBuiltDependencies:
+  - '@scarf/scarf'
+  - msgpackr-extract

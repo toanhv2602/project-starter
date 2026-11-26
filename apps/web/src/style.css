@@ -1,9 +1,100 @@
-:root { font-family: Inter, ui-sans-serif, system-ui, sans-serif; color: #172033; background: #f7f8fb; }
-* { box-sizing: border-box; }
-body { margin: 0; }
-.container { max-width: 760px; margin: 12vh auto; padding: 40px; background: white; border: 1px solid #e7eaf0; border-radius: 18px; }
-.eyebrow { color: #2563eb; font-size: 12px; font-weight: 700; letter-spacing: .12em; }
-h1 { font-size: clamp(32px, 6vw, 52px); margin: 12px 0; }
-.muted { color: #64748b; }
-button { padding: 11px 16px; border: 0; border-radius: 9px; color: white; background: #2563eb; cursor: pointer; }
-.status { margin-top: 18px; font-weight: 600; }
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  color: #172033;
+  background: #f7f8fb;
+  --accent: #2563eb;
+  --border: #e2e6ee;
+  --muted: #64748b;
+  --danger: #b91c1c;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+a {
+  color: var(--accent);
+}
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background: white;
+  border-bottom: 1px solid var(--border);
+}
+.brand {
+  font-weight: 700;
+  text-decoration: none;
+  color: inherit;
+}
+.nav {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.page {
+  max-width: 960px;
+  margin: 40px auto;
+  padding: 0 16px;
+}
+.card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 32px;
+}
+.card.narrow {
+  max-width: 420px;
+  margin: 0 auto;
+}
+.eyebrow {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+.muted {
+  color: var(--muted);
+}
+.error {
+  color: var(--danger);
+}
+form {
+  display: grid;
+  gap: 16px;
+  margin: 20px 0;
+}
+label {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 14px;
+}
+input,
+select,
+textarea {
+  font: inherit;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+button {
+  font: inherit;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 8px;
+  color: white;
+  background: var(--accent);
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+button.link {
+  background: none;
+  color: var(--accent);
+  padding: 0;
+}

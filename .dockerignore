@@ -1,0 +1,17 @@
+# Never send secrets, local deps or build output to the Docker daemon.
+**/node_modules
+**/dist
+**/coverage
+**/.env
+**/.env.*
+!**/.env.example
+.git
+.github
+.claude
+.vscode
+.idea
+**/*.log
+playwright-report
+test-results
+e2e
+docs

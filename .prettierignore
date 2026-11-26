@@ -1,0 +1,9 @@
+pnpm-lock.yaml
+**/dist/**
+**/coverage/**
+**/generated/**
+apps/api/prisma/migrations/**
+packages/api-client/openapi.json
+packages/api-client/src/schema.d.ts
+playwright-report/
+test-results/

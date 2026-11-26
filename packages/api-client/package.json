@@ -3,11 +3,28 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "tsc --noEmit",
+    "generate": "openapi-typescript openapi.json -o src/schema.d.ts",
+    "build": "tsup",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "openapi-fetch": "^0.13.4"
+  },
   "devDependencies": {
-    "typescript": "^5.7.2"
+    "openapi-typescript": "^7.5.2",
+    "tsup": "^8.3.5",
+    "typescript": "~5.7.2"
   }
 }

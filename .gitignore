@@ -5,7 +5,6 @@ coverage/
 .env
 .env.*
 !.env.example
-!.env.test.example
 *.log
 .DS_Store
 .idea/
@@ -13,4 +12,6 @@ coverage/
 !.vscode/extensions.json
 playwright-report/
 test-results/
-.nyc_output/
+blob-report/
+*.tsbuildinfo
+.claude/settings.local.json

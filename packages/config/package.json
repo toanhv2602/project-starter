@@ -1,8 +1,0 @@
-{
-  "name": "@app/config",
-  "version": "0.0.1",
-  "private": true,
-  "scripts": {
-    "build": "echo 'Shared config package'"
-  }
-}
