@@ -1,7 +1,5 @@
 generator client {
-  provider      = "prisma-client-js"
-  // debian-openssl-3.0.x matches the node:22-bookworm-slim runtime image.
-  binaryTargets = ["native", "debian-openssl-3.0.x"]
+  provider = "prisma-client-js"
 }
 
 datasource db {

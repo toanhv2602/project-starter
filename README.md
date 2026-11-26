@@ -29,7 +29,7 @@ the first commit. Then follow **Quick start** below.
 
 ## Quick start
 
-Requirements: Node.js 22 (see `.nvmrc`), pnpm 10 (`corepack enable`), Docker.
+Requirements: Node.js 22.22+ (see `.nvmrc` and `engines`), pnpm 10 (`corepack enable`), Docker.
 
 ```bash
 pnpm install
