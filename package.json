@@ -1,0 +1,27 @@
+{
+  "name": "full-node-starter",
+  "private": true,
+  "packageManager": "pnpm@10.0.0",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @app/web --filter @app/api --filter @app/worker dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:generate": "pnpm --filter @app/api prisma:generate",
+    "db:migrate:dev": "pnpm --filter @app/api prisma:migrate:dev",
+    "db:migrate:deploy": "pnpm --filter @app/api prisma:migrate:deploy"
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "eslint": "^9.17.0",
+    "eslint-plugin-vue": "^9.32.0",
+    "typescript-eslint": "^8.19.0"
+  }
+}

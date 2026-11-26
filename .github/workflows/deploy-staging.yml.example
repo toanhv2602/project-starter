@@ -1,0 +1,22 @@
+# Copy/adjust after choosing a container registry and Cloud VM access method.
+# Use GitHub Environments, protected branches and short-lived credentials.
+# Never put SSH private keys or production secrets in repository files.
+name: Deploy Staging (example)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  deploy:
+    environment: staging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deployment placeholder
+        run: |
+          echo "Configure immutable image build/push, SSH or deployment agent,"
+          echo "migration release job, health checks and rollback before enabling."
