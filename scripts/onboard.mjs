@@ -2,7 +2,7 @@
 /**
  * First-run setup: `pnpm onboard`
  * (Not named "setup": `pnpm setup` is a built-in pnpm command that edits your PATH.)
- * - checks the Node.js version against .nvmrc
+ * - checks the Node.js version against package.json "engines"
  * - creates .env from .env.example with freshly generated secrets
  * - picks free local ports for Postgres/Redis if the defaults are taken
  * Safe to re-run: an existing .env is never overwritten.
@@ -18,10 +18,13 @@ const envPath = join(root, '.env')
 const examplePath = join(root, '.env.example')
 
 function checkNode() {
-  const wanted = Number(readFileSync(join(root, '.nvmrc'), 'utf8').trim())
-  const [major] = process.versions.node.split('.').map(Number)
-  if (major < wanted) {
-    console.error(`✖ Node ${wanted}+ required, found ${process.versions.node} (see .nvmrc)`)
+  // Minimum comes from package.json "engines.node" (">=x.y.z"); some dependencies need a recent minor.
+  const { engines } = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'))
+  const wanted = (engines.node.match(/\d+\.\d+\.\d+/)?.[0] ?? '0.0.0').split('.').map(Number)
+  const current = process.versions.node.split('.').map(Number)
+  const diff = current.map((n, i) => n - wanted[i]).find((d) => d !== 0) ?? 0
+  if (diff < 0) {
+    console.error(`✖ Node ${engines.node} required, found ${process.versions.node}. Upgrade Node.`)
     process.exit(1)
   }
   console.log(`✔ Node ${process.versions.node}`)

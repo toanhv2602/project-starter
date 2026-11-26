@@ -14,16 +14,16 @@
   },
   "dependencies": {
     "@app/contracts": "workspace:*",
-    "bullmq": "^5.34.3",
-    "ioredis": "^5.4.2",
-    "pino": "^9.6.0",
-    "zod": "^4.1.0"
+    "bullmq": "^6.7.10",
+    "ioredis": "^6.1.0",
+    "pino": "^10.4.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@types/node": "^22.10.2",
-    "pino-pretty": "^13.0.0",
-    "tsx": "^4.19.2",
-    "typescript": "~5.7.2",
-    "vitest": "^3.0.0"
+    "@types/node": "^26.6.11",
+    "pino-pretty": "^13.2.0",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.2"
   }
 }

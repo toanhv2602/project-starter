@@ -13,6 +13,10 @@ updates:
         patterns: ['@nestjs/*']
       prisma:
         patterns: ['prisma', '@prisma/*']
+      redis:
+        patterns: ['bullmq', 'ioredis']
+      pino:
+        patterns: ['pino', 'pino-*', 'nestjs-pino']
       vitest:
         patterns: ['vitest', '@vitest/*']
       eslint:
@@ -20,7 +24,7 @@ updates:
       minor-and-patch:
         update-types: [minor, patch]
     ignore:
-      # TypeScript majors need a planned migration (see docs/TROUBLESHOOTING.md, "TypeScript 6").
+      # TypeScript 7 is not supported yet by typescript-eslint, vue-tsc and the Nest CLI (see TROUBLESHOOTING.md).
       - dependency-name: typescript
         update-types: [version-update:semver-major]
   - package-ecosystem: github-actions

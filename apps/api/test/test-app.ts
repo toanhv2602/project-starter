@@ -14,9 +14,14 @@ export async function createTestApp(): Promise<NestFastifyApplication> {
   return app
 }
 
-/** Remove all rows between tests. Add new tables here as modules grow. */
+/** Remove all rows in the `test` schema between tests. */
 export async function resetDatabase(app: NestFastifyApplication): Promise<void> {
   const prisma = app.get(PrismaService)
+  // Safety net: never truncate anything but the dedicated test schema (e.g. dev data in public).
+  const [row] = await prisma.$queryRaw<{ schema: string }[]>`SELECT current_schema() AS schema`
+  if (row?.schema !== 'test') {
+    throw new Error(`resetDatabase refused: current schema is "${row?.schema}", expected "test"`)
+  }
   const tables = await prisma.$queryRaw<{ tablename: string }[]>`
     SELECT tablename FROM pg_tables
     WHERE schemaname = current_schema() AND tablename <> '_prisma_migrations'`

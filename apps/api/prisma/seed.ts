@@ -3,8 +3,11 @@
  */
 import { PrismaClient } from '@prisma/client'
 import * as argon2 from 'argon2'
+import { createPrismaAdapter } from '../src/infrastructure/prisma/prisma-adapter'
 
-const prisma = new PrismaClient()
+const databaseUrl = process.env.DATABASE_URL
+if (!databaseUrl) throw new Error('DATABASE_URL must be set')
+const prisma = new PrismaClient({ adapter: createPrismaAdapter(databaseUrl) })
 
 async function main(): Promise<void> {
   if (process.env.NODE_ENV === 'production') {

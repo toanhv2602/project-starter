@@ -4,9 +4,9 @@ Every item here was hit while validating this starter.
 
 ## Install
 
-**`ERR_PNPM_UNSUPPORTED_ENGINE` for a deep dependency.** Some packages require a recent Node 22
-patch release. Update Node to the latest 22.x (`nvm install 22`). The repo deliberately does not
-set `engine-strict`, so this is a warning unless you enable it.
+**`Unsupported engine` / `ERR_PNPM_UNSUPPORTED_ENGINE`, or web tests fail with `Failed to start forks
+worker`.** The repo needs Node >= 22.22 (`engines` in `package.json`; jsdom 31 requires it).
+Update Node to the latest 22.x (`nvm install 22`). `pnpm onboard` checks this.
 
 **Windows: `spawnSync ... esbuild.exe ENOENT` or other odd install failures.** The path is longer
 than 260 characters. Keep repos in a short path (for example `C:\dev\my-app`). `subst` and
@@ -71,14 +71,17 @@ NestJS packages must share the same major version. `.github/dependabot.yml` grou
 (and Prisma, Vitest, ESLint) so they are bumped together in one PR. If an old single-package PR is
 still open, close it and wait for the grouped one.
 
-**TypeScript 6.** Major TypeScript updates are ignored by Dependabot until migrated on purpose.
-Known blockers found when testing TypeScript 6.0:
+**`pnpm update --latest` installs a Prisma release candidate.** The `latest` npm tag of `prisma`
+has pointed at an 8.0 RC. Keep `prisma`, `@prisma/client` and `@prisma/adapter-pg` on the same
+stable version (check `npm view @prisma/client dist-tags`).
 
-- tsup 8.5 always passes `baseUrl` to the DTS build → `TS5101`. Fix: in `packages/*/tsup.config.ts`
-  set `dts: { compilerOptions: { ignoreDeprecations: '6.0' } }` (invalid on TypeScript 5, so change
-  it together with the upgrade).
-- `apps/api` uses `moduleResolution: Node10` → `TS5107`. Fix: move to `module`/`moduleResolution`
-  `Node16`, add `.js` extensions to relative imports, and keep `vitest.config.ts` out of the
-  CommonJS type check (it imports ESM-only packages).
+**TypeScript 7.** Not supported yet by typescript-eslint, vue-tsc and the Nest CLI, so Dependabot
+ignores TypeScript majors. Upgrade when those tools support it, then run `pnpm verify` and e2e.
 
-Run `pnpm verify` and the e2e tests after the migration.
+**NestJS 12 is ESM-only.** The API still emits CommonJS and loads Nest with `require()` of ESM
+(Node >= 22.12). That is why `apps/api/tsconfig.json` uses `"module": "Node20"`; `Node10`/`CommonJS`
+fail with `TS1479`. Dynamic `import()` of local files needs the `.js` extension (see `main.ts`).
+
+**Prisma 7: "The datasource property `url` is no longer supported".** The URL lives in
+`apps/api/prisma.config.ts`, and `PrismaService` connects through `@prisma/adapter-pg`.
+Create clients with `createPrismaAdapter()`: it maps `?schema=` to the adapter and `search_path`.

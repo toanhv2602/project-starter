@@ -1,7 +1,19 @@
-import { type RedisOptions } from 'ioredis'
+/**
+ * Connection settings parsed from a redis:// or rediss:// URL.
+ * Plain object accepted by both ioredis (`new Redis(options)`) and BullMQ (`connection`),
+ * which have separate option types since BullMQ 6. BullMQ owns its own connections.
+ */
+export interface RedisConnectionSettings {
+  host: string
+  port: number
+  username?: string
+  password?: string
+  db: number
+  tls?: Record<string, never>
+  maxRetriesPerRequest: null
+}
 
-/** Convert a redis:// or rediss:// URL into ioredis options (BullMQ owns these connections). */
-export function redisOptionsFromUrl(url: string): RedisOptions {
+export function redisOptionsFromUrl(url: string): RedisConnectionSettings {
   const parsed = new URL(url)
   return {
     host: parsed.hostname,
