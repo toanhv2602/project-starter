@@ -46,17 +46,18 @@ pnpm dev                # web + api + worker with hot reload
 
 ## Commands
 
-| Command                  | Purpose                                                      |
-| ------------------------ | ------------------------------------------------------------ |
-| `pnpm dev`               | Run everything in watch mode                                 |
-| `pnpm verify`            | format check + lint + typecheck + tests + build (same as CI) |
-| `pnpm test`              | All tests (API tests need Postgres + Redis running)          |
-| `pnpm lint` / `lint:fix` | ESLint for the whole repo                                    |
-| `pnpm format`            | Prettier                                                     |
-| `pnpm db:migrate:dev`    | Create + apply a migration after editing `schema.prisma`     |
-| `pnpm db:migrate:deploy` | Apply pending migrations (CI / deployed environments)        |
-| `pnpm api:generate`      | Regenerate the typed API client after changing endpoints     |
-| `pnpm infra:up` / `down` | Start / stop local Postgres + Redis                          |
+| Command                  | Purpose                                                                                            |
+| ------------------------ | -------------------------------------------------------------------------------------------------- |
+| `pnpm dev`               | Run everything in watch mode                                                                       |
+| `pnpm verify`            | format check + lint + typecheck + tests + build (same as CI)                                       |
+| `pnpm test`              | Unit + integration tests (needs Postgres + Redis running)                                          |
+| `pnpm test:e2e`          | Playwright journeys; starts `pnpm dev` itself. Set `PW_CHANNEL=msedge` to use an installed browser |
+| `pnpm lint` / `lint:fix` | ESLint for the whole repo                                                                          |
+| `pnpm format`            | Prettier                                                                                           |
+| `pnpm db:migrate:dev`    | Create + apply a migration after editing `schema.prisma`                                           |
+| `pnpm db:migrate:deploy` | Apply pending migrations (CI / deployed environments)                                              |
+| `pnpm api:generate`      | Regenerate the typed API client after changing endpoints                                           |
+| `pnpm infra:up` / `down` | Start / stop local Postgres + Redis                                                                |
 
 ## Adding a feature
 
