@@ -54,7 +54,7 @@ USER node
 CMD ["node", "dist/main.js"]
 
 # ---------- web: static SPA served by unprivileged nginx (port 8080) ----------
-FROM nginxinc/nginx-unprivileged:1.27-alpine AS web
+FROM nginxinc/nginx-unprivileged:1.31-alpine AS web
 COPY infra/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /repo/apps/web/dist /usr/share/nginx/html
 EXPOSE 8080
