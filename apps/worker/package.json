@@ -16,7 +16,7 @@
     "@app/contracts": "workspace:*",
     "bullmq": "^5.34.3",
     "ioredis": "^5.4.2",
-    "pino": "^9.6.0",
+    "pino": "^10.4.0",
     "zod": "^4.1.0"
   },
   "devDependencies": {
