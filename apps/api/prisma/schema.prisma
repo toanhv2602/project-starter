@@ -6,7 +6,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 // Conventions: snake_case tables/columns via @map, UUID keys, timestamptz everywhere.

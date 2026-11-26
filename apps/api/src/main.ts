@@ -5,8 +5,8 @@ import { loadEnvFile } from './config/load-env-file'
 loadEnvFile()
 
 async function main(): Promise<void> {
-  const { createApp } = await import('./bootstrap')
-  const { ENV } = await import('./config/config.module')
+  const { createApp } = await import('./bootstrap.js')
+  const { ENV } = await import('./config/config.module.js')
   const app = await createApp()
   const { API_PORT } = app.get<{ API_PORT: number }>(ENV)
   await app.listen(API_PORT, '0.0.0.0')
