@@ -1,66 +1,76 @@
 # Project Engineering Guide
 
 ## Project
-TypeScript pnpm monorepo:
-- `apps/web`: Vue 3 + Vite + TypeScript
-- `apps/api`: NestJS + Fastify + Prisma
-- `apps/worker`: BullMQ background worker
-- `packages/contracts`: shared Zod contracts
-- PostgreSQL is the source of truth; Redis is cache/queue infrastructure.
-- Architecture: Modular Monolith. Do not introduce microservices without an approved ADR.
+
+TypeScript pnpm monorepo, modular monolith:
+
+- `apps/web`: Vue 3 + Vite. Pinia = client state, TanStack Query = server state.
+- `apps/api`: NestJS + Fastify + Prisma (PostgreSQL). REST under `/api/v1`, OpenAPI at `/docs`.
+- `apps/worker`: BullMQ consumers. Jobs must be idempotent.
+- `packages/contracts`: Zod schemas shared by all apps. **Single source of truth** for request,
+  response and job payload shapes.
+- `packages/api-client`: generated from OpenAPI (`pnpm api:generate`). Never edit by hand.
+- PostgreSQL is the source of truth; Redis is for queues/cache only.
+- Do not introduce microservices or new infrastructure without an approved ADR (`docs/architecture/decisions`).
 
 ## Commands
-- `pnpm dev`, `pnpm build`, `pnpm lint`, `pnpm typecheck`, `pnpm test`
-- `pnpm db:generate`, `pnpm db:migrate:dev`, `pnpm db:migrate:deploy`
 
-## Architecture rules
-- Each business module owns its domain rules and persistence boundary.
-- Cross-module calls use exported application interfaces; never import another module's private repository.
-- Keep controllers thin. Application services orchestrate use cases.
-- Domain code must not depend on NestJS, Prisma, HTTP or infrastructure.
-- Avoid circular dependencies and premature abstractions.
-- Use REST under `/api/v1`; document it with OpenAPI.
+- `pnpm dev` — all apps in watch mode (needs `pnpm infra:up`)
+- `pnpm verify` — what CI runs; must pass before a change is done
+- `pnpm --filter @app/api test` — API integration tests (real Postgres + Redis)
+- `pnpm db:migrate:dev --name <change>` — after editing `schema.prisma`
+- `pnpm api:generate` — after changing any API endpoint or DTO
 
-## TypeScript and validation
-- Strict TypeScript. Avoid `any`; use `unknown` and narrow.
-- Validate all untrusted input at boundaries.
-- Do not duplicate generated API types manually.
-- Never trust frontend validation for security.
+## How to add a feature
+
+Follow `docs/NEW_FEATURE.md` step by step: contract → Prisma model + migration → API module →
+integration tests → `pnpm api:generate` → UI. Reference implementations: `modules/auth`,
+`modules/users` (API), `pages/LoginPage.vue`, `pages/HomePage.vue` (web).
+
+## API rules
+
+- Controllers: HTTP mapping only. Services: use cases. Map Prisma models to contract types in one
+  `toDto()`; never return Prisma models directly.
+- DTOs come from contracts: `class XDto extends createZodDto(xSchema) {}`. Validation is global.
+- Every route requires auth unless marked `@Public()`. Use `@CurrentUser()`, `@Roles()`.
+- Scope every query by owner/tenant. Another user's resource → 404.
+- Expected errors: `throw new AppError(status, 'STABLE_CODE', 'Human message')`.
+- Cross-module access only through an exported service, never another module's Prisma queries.
+- Inject config with `@InjectEnv() env: Env`; add new variables to `config/env.ts` **and**
+  `.env.example`. Never read `process.env` elsewhere.
+- Use explicit transactions for multi-write operations.
 
 ## Database
-- Prisma is the default ORM.
-- Every schema change requires a migration.
-- Use `prisma migrate dev` locally and `prisma migrate deploy` in deployed environments.
-- Never use `db push` in staging/production.
-- Use raw SQL only for a justified query/feature Prisma cannot express well.
-- Review indexes, constraints, transaction boundaries and query plans.
-- Never edit a migration already applied to a shared environment.
 
-## Authentication security
-- Access tokens must be short-lived.
-- Store only a cryptographic hash of refresh tokens.
-- Rotate refresh tokens on use and revoke token families on detected reuse.
-- Never log credentials, bearer tokens, refresh tokens or secrets.
-- Enforce authorization in the backend.
-- Keep JWT secrets outside source control and use a secret manager in production.
-- Add rate limiting and account abuse protections before public launch.
-- Treat the auth code as a foundation until flows have integration tests and security review.
+- Every schema change needs a migration. Review the generated SQL.
+- Never edit a migration applied to a shared environment. Never use `db push` or `migrate reset`
+  outside a disposable local database.
+- snake_case via `@map`, UUID ids, `@db.Timestamptz(3)`, indexes for real query patterns.
 
-## Frontend
-- Vue 3 Composition API with `<script setup lang="ts">`.
-- Pinia is for client state; TanStack Query is for server state.
-- Handle loading, error, empty and success states.
-- Keep components focused; move reusable behavior into composables.
+## Frontend rules
+
+- `<script setup lang="ts">`, Composition API. Feature hooks in `src/features/<name>/`.
+- Use the typed `api` client (`@/lib/api`) and `unwrap()`. Never call `fetch` directly.
+- Handle loading, error, empty and success states. Validate forms with the contract schema.
+- Frontend checks are UX only; the API enforces authorization.
+
+## Security
+
+- Never log or commit secrets, tokens, passwords or personal data. The logger redacts common
+  fields; do not add new ones to log context.
+- Access token stays in memory; refresh token is an HttpOnly cookie. Do not change this without
+  updating `docs/security/authentication.md`.
 
 ## Testing and completion
-- Unit-test domain and application logic.
-- Integration-test persistence against PostgreSQL, not SQLite substitutes.
-- Test auth, authorization, validation and failure paths.
-- Use Playwright for critical user journeys.
-- For each change: inspect → plan → implement → test → review diff.
-- Never claim a command passed unless it was actually executed.
-- Do not weaken/delete tests merely to make CI pass.
+
+- API: integration tests in `apps/api/test` with `createTestApp`, `resetDatabase`, `signUp`.
+  Cover 401, validation 400, ownership 404, happy path.
+- Unit-test pure logic next to the code (`*.spec.ts` / `*.test.ts`).
+- Workflow: inspect → plan → implement → test → review diff.
+- Never claim a command passed unless it was run. Never weaken or delete tests to pass CI.
 
 ## Definition of done
-Requirements met; architecture respected; validation/auth correct; tests pass;
-migrations/contracts/docs updated; no secrets/debug artifacts; remaining risks reported.
+
+Requirements met; architecture rules respected; validation and auth correct; tests added and
+passing; migrations, contracts, generated client and docs updated; `pnpm verify` passes; no
+secrets or debug artifacts; remaining risks reported.

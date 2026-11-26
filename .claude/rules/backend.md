@@ -1,7 +1,7 @@
 ---
 paths:
-  - "apps/api/**/*.ts"
-  - "apps/worker/**/*.ts"
+  - 'apps/api/**/*.ts'
+  - 'apps/worker/**/*.ts'
 ---
 
 - Keep controllers thin and validate every external input.

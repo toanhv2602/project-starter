@@ -34,3 +34,26 @@ export function refreshCookieFrom(setCookie: string | string[] | undefined): str
   }
   return undefined
 }
+
+let userCounter = 0
+
+/** Register a fresh user and return an Authorization header for it. */
+export async function signUp(
+  app: NestFastifyApplication,
+  overrides: Partial<{ email: string; password: string; displayName: string }> = {},
+): Promise<{ userId: string; headers: { authorization: string } }> {
+  userCounter += 1
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/v1/auth/register',
+    payload: {
+      email: `user${userCounter}-${Date.now()}@example.com`,
+      password: 'correct-horse-battery-staple',
+      displayName: `User ${userCounter}`,
+      ...overrides,
+    },
+  })
+  if (res.statusCode !== 201) throw new Error(`signUp failed: ${res.statusCode} ${res.body}`)
+  const body = res.json<{ accessToken: string; user: { id: string } }>()
+  return { userId: body.user.id, headers: { authorization: `Bearer ${body.accessToken}` } }
+}

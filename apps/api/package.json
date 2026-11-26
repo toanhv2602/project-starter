@@ -2,6 +2,10 @@
   "name": "@app/api",
   "version": "0.0.1",
   "private": true,
+  "files": [
+    "dist",
+    "prisma"
+  ],
   "scripts": {
     "dev": "nest start --watch",
     "build": "nest build -p tsconfig.build.json",

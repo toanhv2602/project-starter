@@ -6,6 +6,7 @@ description: Review code, API endpoints, authentication, authorization, secrets 
 # Security Review
 
 Check:
+
 - Authentication and authorization at every sensitive endpoint.
 - IDOR / tenant boundary violations.
 - Input validation, injection, unsafe file handling and SSRF.

@@ -29,7 +29,13 @@ export default tseslint.config(
     },
   },
   {
-    files: ['apps/api/**/*.ts', 'apps/worker/**/*.ts', 'scripts/**/*.{js,mjs}', '*.{js,mjs}'],
+    files: [
+      'apps/api/**/*.ts',
+      'apps/worker/**/*.ts',
+      'scripts/**/*.{js,mjs}',
+      '.claude/**/*.{js,mjs}',
+      '*.{js,mjs}',
+    ],
     languageOptions: { globals: globals.node },
   },
   {
@@ -52,6 +58,11 @@ export default tseslint.config(
     // NestJS relies on emitDecoratorMetadata: injected classes must be value imports.
     files: ['apps/api/**/*.ts'],
     rules: { '@typescript-eslint/consistent-type-imports': 'off' },
+  },
+  {
+    // CLI scripts talk to the user through the console.
+    files: ['scripts/**/*.{js,mjs}'],
+    rules: { 'no-console': 'off' },
   },
   prettier,
 )

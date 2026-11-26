@@ -1,6 +1,6 @@
 ---
 paths:
-  - "apps/web/src/**/*.{ts,vue}"
+  - 'apps/web/src/**/*.{ts,vue}'
 ---
 
 - Use `<script setup lang="ts">` and Composition API.

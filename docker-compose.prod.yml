@@ -1,0 +1,85 @@
+# Production-style stack for a single Cloud VM.
+#   cp .env.production.example .env.production   # fill in real secrets
+#   docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+# Prefer managed Postgres/Redis in production; then delete those two services and
+# point DATABASE_URL / REDIS_URL at them.
+name: full-node-starter-prod
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set in .env.production}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env.production}
+      POSTGRES_DB: ${POSTGRES_DB:?set in .env.production}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [backend]
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ['redis-server', '--appendonly', 'yes']
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [backend]
+
+  # Release step: applies pending migrations, then exits. api starts only if it succeeds.
+  migrate:
+    image: ${IMAGE_PREFIX:-app}/api:${IMAGE_TAG:-local}
+    build: { context: ., target: api }
+    env_file: .env.production
+    command: ['node_modules/.bin/prisma', 'migrate', 'deploy']
+    restart: 'no'
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [backend]
+
+  api:
+    image: ${IMAGE_PREFIX:-app}/api:${IMAGE_TAG:-local}
+    build: { context: ., target: api }
+    env_file: .env.production
+    restart: unless-stopped
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_healthy }
+    networks: [backend, frontend]
+
+  worker:
+    image: ${IMAGE_PREFIX:-app}/worker:${IMAGE_TAG:-local}
+    build: { context: ., target: worker }
+    env_file: .env.production
+    restart: unless-stopped
+    stop_grace_period: 40s
+    depends_on:
+      redis: { condition: service_healthy }
+    networks: [backend]
+
+  web:
+    image: ${IMAGE_PREFIX:-app}/web:${IMAGE_TAG:-local}
+    build: { context: ., target: web }
+    restart: unless-stopped
+    ports:
+      - '${WEB_PORT:-8080}:8080'
+    depends_on:
+      api: { condition: service_healthy }
+    networks: [frontend]
+
+networks:
+  backend:
+  frontend:
+
+volumes:
+  postgres_data:
+  redis_data:

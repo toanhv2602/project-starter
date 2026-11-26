@@ -1,0 +1,4 @@
+# Replace with your GitHub team, e.g. @your-org/platform
+# *                      @your-org/maintainers
+# /apps/api/prisma/      @your-org/backend
+# /.github/              @your-org/maintainers

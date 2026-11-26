@@ -15,9 +15,6 @@ onlyBuiltDependencies:
   - simple-git-hooks
   - vue-demi
 
-# Required by `pnpm deploy` (used in Dockerfiles) for workspace dependencies.
-injectWorkspacePackages: true
-
 # Build scripts we deliberately skip (telemetry / optional native speed-ups).
 ignoredBuiltDependencies:
   - '@scarf/scarf'

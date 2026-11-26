@@ -3,58 +3,96 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main, develop]
+    branches: [main]
 
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
-        image: postgres:16
+        image: postgres:16-alpine
         env:
           POSTGRES_USER: app
           POSTGRES_PASSWORD: app_test_password
           POSTGRES_DB: app_test_db
-        ports: ["5432:5432"]
+        ports: ['5432:5432']
         options: >-
           --health-cmd "pg_isready -U app -d app_test_db"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-interval 5s --health-timeout 5s --health-retries 10
       redis:
-        image: redis:7
-        ports: ["6379:6379"]
+        image: redis:7-alpine
+        ports: ['6379:6379']
         options: >-
           --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-interval 5s --health-timeout 3s --health-retries 10
 
     env:
       DATABASE_URL: postgresql://app:app_test_password@localhost:5432/app_test_db?schema=public
       REDIS_URL: redis://localhost:6379
-      JWT_ACCESS_SECRET: ci-only-access-secret-change-me-123456
-      JWT_REFRESH_SECRET: ci-only-refresh-secret-change-me-123456
-      JWT_ACCESS_TTL: 15m
-      JWT_REFRESH_TTL: 30d
+      JWT_ACCESS_SECRET: ci-only-access-secret-not-used-anywhere-else
+      JWT_REFRESH_SECRET: ci-only-refresh-secret-not-used-anywhere-else
       NODE_ENV: test
 
     steps:
       - uses: actions/checkout@v4
+      # Version comes from "packageManager" in package.json.
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm db:generate
-      - run: pnpm db:migrate:deploy
+      - run: pnpm build:packages
+
+      - name: OpenAPI client is up to date
+        run: |
+          pnpm api:generate
+          pnpm build:packages
+          git diff --exit-code -- packages/api-client || {
+            echo "::error::API contract changed. Run 'pnpm api:generate' and commit the result."
+            exit 1
+          }
+
+      - name: Prisma schema and migrations are in sync
+        run: |
+          pnpm --filter @app/api exec prisma migrate diff \
+            --from-migrations prisma/migrations \
+            --to-schema-datamodel prisma/schema.prisma \
+            --shadow-database-url "postgresql://app:app_test_password@localhost:5432/app_test_db?schema=shadow" \
+            --exit-code || {
+            echo "::error::schema.prisma has changes without a migration. Run 'pnpm db:migrate:dev'."
+            exit 1
+          }
+
+      - run: pnpm format:check
       - run: pnpm lint
-      - run: pnpm typecheck
-      - run: pnpm test
-      - run: pnpm build
+      - run: pnpm -r typecheck
+      - run: pnpm -r test
+      - run: pnpm -r build
+
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        target: [api, worker, web]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build ${{ matrix.target }} image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: ${{ matrix.target }}
+          push: false
+          cache-from: type=gha,scope=${{ matrix.target }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.target }}
